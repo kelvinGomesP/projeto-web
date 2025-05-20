@@ -1,0 +1,20 @@
+[
+  {
+    "nome": "Mario",
+    "cpf": "123123123123",
+    "email": "michael.soares@sedsdh.rj.gov.br",
+    "telefone": "43243",
+    "endereco": "Cruziero Velho",
+    "nomeAluno": "asdaa",
+    "aluno_id": "1312313212313"
+  },
+  {
+    "nome": "Claudio",
+    "cpf": "12312312",
+    "email": "claudio@gmail.com",
+    "telefone": "123123",
+    "endereco": "1231dsada12",
+    "nomeAluno": "clovis",
+    "aluno_id": "3434342"
+  }
+]
