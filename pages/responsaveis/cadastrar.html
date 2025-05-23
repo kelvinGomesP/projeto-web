@@ -148,102 +148,90 @@
     </form>
   </div>
 
-  <script>
-    const form = document.getElementById('form-responsavel');
-    const mensagem = document.getElementById('mensagem');
-    const titulo = document.getElementById('titulo');
-    const cpfField = document.getElementById('cpf');
+<script>
+  const form = document.getElementById('form-responsavel');
+  const mensagem = document.getElementById('mensagem');
+  const titulo = document.getElementById('titulo');
+  const cpfField = document.getElementById('cpf');
 
-    // Verifica se existe um 'cpf' na URL para edição
-    const params = new URLSearchParams(window.location.search);
-    const cpfResponsavel = params.get('cpf');
+  // Limpa a formatação do CPF
+  function limparCPF(cpf) {
+    return cpf.replace(/\D/g, '');
+  }
 
-    // Se CPF estiver na URL, busca os dados para editar
-    if (cpfResponsavel) {
-      titulo.textContent = 'Editar Responsável';
-      
-      fetch(`/PassUsers/${cpfResponsavel}`)
-        .then(response => response.json())
-        .then(responsavel => {
-          if (responsavel) {
-            // Preenche os campos com os dados do responsável
-            document.getElementById('nome').value = responsavel.nome;
-            document.getElementById('cpf').value = responsavel.cpf;
-            document.getElementById('email').value = responsavel.email;
-            document.getElementById('telefone').value = responsavel.telefone;
-            document.getElementById('endereco').value = responsavel.endereco;
-            document.getElementById('nomeAluno').value = responsavel.nomeAluno;
-            document.getElementById('aluno_id').value = responsavel.aluno_id || responsavel.idAluno;
-          } else {
-            mensagem.style.display = 'block';
-            mensagem.textContent = 'Responsável não encontrado.';
-            mensagem.className = 'mensagem erro';
-          }
-        })
-        .catch(error => {
-          console.error('Erro ao carregar dados:', error);
+  const params = new URLSearchParams(window.location.search);
+  const cpfResponsavel = params.get('cpf');
+  const cpfLimpo = cpfResponsavel ? limparCPF(cpfResponsavel) : null;
+
+  if (cpfLimpo) {
+    titulo.textContent = 'Editar Responsável';
+    cpfField.disabled = true;
+
+    fetch('/PassUsers')
+      .then(response => response.json())
+      .then(lista => {
+        const responsavel = lista.find(r => limparCPF(r.cpf) === cpfLimpo);
+        if (responsavel) {
+          document.getElementById('nome').value = responsavel.nome;
+          document.getElementById('cpf').value = responsavel.cpf;
+          document.getElementById('email').value = responsavel.email;
+          document.getElementById('telefone').value = responsavel.telefone;
+          document.getElementById('endereco').value = responsavel.endereco;
+          document.getElementById('nomeAluno').value = responsavel.nomeAluno;
+          document.getElementById('aluno_id').value = responsavel.aluno_id || responsavel.idAluno;
+        } else {
           mensagem.style.display = 'block';
-          mensagem.textContent = 'Erro ao carregar dados para edição.';
+          mensagem.textContent = 'Responsável não encontrado.';
           mensagem.className = 'mensagem erro';
-        });
-    }
-
-    form.addEventListener('submit', function(event) {
-      event.preventDefault();
-
-      const formData = new FormData(form);
-      const dados = {};
-      formData.forEach((value, key) => {
-        dados[key] = value;
+        }
+      })
+      .catch(error => {
+        console.error('Erro ao carregar dados:', error);
+        mensagem.style.display = 'block';
+        mensagem.textContent = 'Erro ao carregar dados para edição.';
+        mensagem.className = 'mensagem erro';
       });
+  }
 
-      // Se o CPF já existe, é uma edição
-      if (cpfResponsavel) {
-        fetch(`/PassUsers/${cpfResponsavel}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(dados)
-        })
-        .then(response => response.json())
-        .then(result => {
-          mensagem.style.display = 'block';
-          if (result.message) {
-            mensagem.textContent = result.message;
-            mensagem.className = 'mensagem sucesso';
-          }
-        })
-        .catch(error => {
-          console.error('Erro:', error);
-          mensagem.style.display = 'block';
-          mensagem.textContent = 'Erro ao editar. Tente novamente.';
-          mensagem.className = 'mensagem erro';
-        });
-      } else {
-        // Caso contrário, faz o cadastro
-        fetch('/PassUsers', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(dados)
-        })
-        .then(response => response.json())
-        .then(result => {
-          mensagem.style.display = 'block';
-          mensagem.textContent = result.message || 'Cadastro realizado com sucesso!';
-          mensagem.className = 'mensagem sucesso';
-          form.reset();
-        })
-        .catch(error => {
-          console.error('Erro:', error);
-          mensagem.style.display = 'block';
-          mensagem.textContent = 'Erro ao cadastrar. Tente novamente.';
-          mensagem.className = 'mensagem erro';
-        });
-      }
+  form.addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    const formData = new FormData(form);
+   const dados = {};
+   formData.forEach((value, key) => {
+   dados[key] = value;
+});
+
+if (cpfResponsavel) {
+  delete dados.cpf; // ← Remover o CPF para não sobrescrever
+}
+
+
+    const method = cpfLimpo ? 'PUT' : 'POST';
+    const endpoint = cpfLimpo ? `/PassUsers/${cpfLimpo}` : '/PassUsers';
+
+    fetch(endpoint, {
+      method,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(dados)
+    })
+    .then(response => response.json())
+    .then(result => {
+      mensagem.style.display = 'block';
+      mensagem.textContent = result.message || (cpfLimpo ? 'Atualização realizada!' : 'Cadastro realizado com sucesso!');
+      mensagem.className = 'mensagem sucesso';
+      if (!cpfLimpo) form.reset();
+    })
+    .catch(error => {
+      console.error('Erro:', error);
+      mensagem.style.display = 'block';
+      mensagem.textContent = cpfLimpo ? 'Erro ao editar. Tente novamente.' : 'Erro ao cadastrar. Tente novamente.';
+      mensagem.className = 'mensagem erro';
     });
-  </script>
+  });
+</script>
+
 </body>
 </html>

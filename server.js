@@ -31,7 +31,6 @@ app.post('/PassUsers', (req, res) => {
     responsaveis = JSON.parse(dadosAtuais);
   }
 
-  // Armazena o CPF sem formatação para facilitar comparação
   novoResponsavel.cpf = novoResponsavel.cpf.replace(/\D/g, '');
 
   responsaveis.push(novoResponsavel);
@@ -56,9 +55,30 @@ app.get('/PassUsers', (req, res) => {
   }
 });
 
-// Rota DELETE: remove um responsável pelo CPF (remove formatação para comparar)
+// Rota GET (individual): retorna um responsável pelo CPF
+app.get('/PassUsers/:cpf', (req, res) => {
+  const cpf = req.params.cpf.replace(/\D/g, '');
+
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ message: 'Arquivo de dados não encontrado.' });
+  }
+
+  const dados = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  const responsavel = dados.find(r => r.cpf.replace(/\D/g, '') === cpf);
+
+  if (!responsavel) {
+    return res.status(404).json({ message: 'Responsável não encontrado.' });
+  }
+
+  res.json({
+    ...responsavel,
+    cpf: formatarCPF(responsavel.cpf)
+  });
+});
+
+// Rota DELETE: remove um responsável pelo CPF
 app.delete('/PassUsers/:cpf', (req, res) => {
-  const cpf = req.params.cpf.replace(/\D/g, ''); // CPF limpo
+  const cpf = req.params.cpf.replace(/\D/g, '');
 
   if (!fs.existsSync(filePath)) {
     return res.status(404).json({ message: 'Arquivo de dados não encontrado.' });
@@ -75,9 +95,29 @@ app.delete('/PassUsers/:cpf', (req, res) => {
   res.json({ message: 'Responsável excluído com sucesso.' });
 });
 
-// Função utilitária para formatar CPF no formato 000-000-000-00
+// ✅ Rota PUT: atualiza um responsável pelo CPF
+app.put('/PassUsers/:cpf', (req, res) => {
+  const cpf = req.params.cpf.replace(/\D/g, ''); // remove tudo que não é número
+  const novosDados = req.body;
+
+  const responsavelIndex = responsaveis.findIndex(r => r.cpf.replace(/\D/g, '') === cpf);
+
+  if (responsavelIndex === -1) {
+    return res.status(404).json({ message: 'Responsável não encontrado para edição.' });
+  }
+
+  // Atualiza os dados (mantém o mesmo CPF original)
+  responsaveis[responsavelIndex] = { ...responsaveis[responsavelIndex], ...novosDados };
+
+  fs.writeFileSync('responsaveis.json', JSON.stringify(responsaveis, null, 2));
+
+  res.json({ message: 'Responsável atualizado com sucesso!' });
+});
+
+
+// Função para formatar CPF no formato 000-000-000-00
 function formatarCPF(cpf) {
-  cpf = cpf.replace(/\D/g, ''); // Remove tudo que não for número
+  cpf = cpf.replace(/\D/g, '');
   return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1-$2-$3-$4");
 }
 
