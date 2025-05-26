@@ -1,0 +1,89 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #eef2f5;
+    margin: 0;
+    padding: 0;
+  }
+  
+  header {
+    background-color: #2C4D56;
+    color: white;
+    padding: 0.5rem;
+    text-align: left;
+  }
+  
+  main {
+    padding: 2rem;
+    text-align: center;
+  }
+  
+  button {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    background-color: #BD3200;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #DC7612;
+  }
+
+  .logo{
+    height: 60px;       /* altura da imagem */
+    margin-left: 2rem;  /* espaço da borda esquerda */
+  }
+  
+  .linha-alunos,
+  .linha-professores,
+  .linha-funcionarios {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+
+    font-size: 2.5rem;
+
+    border-bottom: 1px solid #ccc; /* opcional: só pra separar visualmente */
+  }
+
+  .tabela-alunos,
+  .tabela-professores,
+  .tabela-funcionarios {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fdf1d3; /* bege claro */
+    font-family: 'Georgia', serif;
+    text-align: center;
+  }
+  
+  .tabela-alunos th,
+  .tabela-alunos td, 
+  .tabela-professores th, 
+  .tabela-professores td, 
+  .tabela-funcionarios th,
+  .tabela-funcionarios td {
+    border: 1px solid #BD3200;
+    padding: 0.75rem;
+  }
+  
+  .tabela-alunos th,
+  .tabela-professores th,
+  .tabela-funcionarios {
+    background-color: #F6E8B8;
+    font-weight: bold;
+  }
+  
+.tabela-alunos tbody tr:nth-child(odd),
+.tabela-professores tbody tr:nth-child(odd),
+.tabela-funcionarios tbody tr:nth-child(odd) {
+  background-color: #fff9ea; /* cor clara para linhas ímpares */
+}
+
+.tabela-alunos tbody tr:nth-child(even),
+.tabela-professores tbody tr:nth-child(even),
+.tabela-funcionarios tbody tr:nth-child(even) {
+  background-color: #fdf1d3; 
+}
